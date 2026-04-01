@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Gentleman's Commission Calculator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Custom scrollbar for a polished look */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #000; }
+    ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #a98a66; }
+  </style>
+</head>
+<body class="min-h-screen bg-black text-white font-sans p-6 md:p-12">
+
+  <!-- Header -->
+  <header class="max-w-6xl mx-auto mb-12 text-center border-b border-[#a98a66] pb-8">
+    <h1 class="text-3xl md:text-5xl font-serif text-[#a98a66] mb-4 uppercase tracking-widest">
+      The Gentleman's Commission
+    </h1>
+    <p class="text-gray-400 text-sm md:text-base max-w-2xl mx-auto uppercase tracking-wider">
+      Architecture & Performance Calculator
+    </p>
+  </header>
+
+  <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12">
+    
+    <!-- Left Column: Controls -->
+    <div class="lg:col-span-5 space-y-10">
+      
+      <!-- Performance Inputs -->
+      <div class="bg-zinc-950 p-6 border border-[#a98a66]/30 rounded-sm">
+        <h2 class="text-xl text-[#a98a66] font-serif mb-6 flex items-center uppercase tracking-wide">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
+          Monthly Performance
+        </h2>
+        
+        <div class="space-y-6">
+          <div>
+            <label class="flex justify-between text-sm mb-2 text-gray-300 uppercase tracking-wide">
+              <span>New Closes This Month</span>
+              <span id="deals-val" class="text-[#a98a66] font-bold">5</span>
+            </label>
+            <input 
+              type="range" id="deals" min="0" max="20" value="5" 
+              oninput="updateDOM()"
+              class="w-full accent-[#a98a66]"
+            />
+          </div>
+
+          <div>
+            <label class="flex justify-between text-sm mb-2 text-gray-300 uppercase tracking-wide">
+              <span>Average Contract Value</span>
+              <span id="dealValue-val" class="text-[#a98a66] font-bold">$2,000.00</span>
+            </label>
+            <input 
+              type="range" id="dealValue" min="1000" max="10000" step="500" value="2000" 
+              oninput="updateDOM()"
+              class="w-full accent-[#a98a66]"
+            />
+          </div>
+
+          <div>
+            <label class="flex justify-between text-sm mb-2 text-gray-300 uppercase tracking-wide">
+              <span>Active Clients (Book of Business)</span>
+              <span id="existingClients-val" class="text-[#a98a66] font-bold">15</span>
+            </label>
+            <input 
+              type="range" id="existingClients" min="0" max="100" value="15" 
+              oninput="updateDOM()"
+              class="w-full accent-[#a98a66]"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- The Guardrails -->
+      <div class="bg-zinc-950 p-6 border border-red-900/50 rounded-sm relative overflow-hidden">
+        <div class="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-24 h-24 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        </div>
+        <h2 class="text-xl text-white font-serif mb-6 flex items-center uppercase tracking-wide">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          The Gentleman's Code
+        </h2>
+        
+        <div class="space-y-4 relative z-10">
+          <label class="flex items-start space-x-3 cursor-pointer p-3 border border-zinc-800 rounded hover:border-[#a98a66] transition-colors">
+            <input 
+              type="checkbox" id="inCrm" checked
+              onchange="updateDOM()"
+              class="mt-1 accent-[#a98a66] w-4 h-4 cursor-pointer"
+            />
+            <div>
+              <div class="text-sm font-bold uppercase tracking-wide">The CRM Mandate</div>
+              <div class="text-xs text-gray-400 mt-1">Lead is in CRM with updated notes. (Requirement for payout)</div>
+            </div>
+          </label>
+
+          <label class="flex items-start space-x-3 cursor-pointer p-3 border border-zinc-800 rounded hover:border-[#a98a66] transition-colors">
+            <input 
+              type="checkbox" id="noDiscount" checked
+              onchange="updateDOM()"
+              class="mt-1 accent-[#a98a66] w-4 h-4 cursor-pointer"
+            />
+            <div>
+              <div class="text-sm font-bold uppercase tracking-wide">The No-Discount Rule</div>
+              <div class="text-xs text-gray-400 mt-1">Full price sold. No discounts offered to "get the deal".</div>
+            </div>
+          </label>
+        </div>
+        
+        <div id="penalty-box" class="hidden mt-4 p-3 bg-red-950/40 border border-red-900 text-red-200 text-sm flex items-start">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          <span>
+            Code Violation: Penalty applied. You are losing <span id="potential-lost" class="font-bold"></span> in commissions.
+          </span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Column: Dashboard -->
+    <div class="lg:col-span-7 space-y-8">
+      
+      <!-- Main Display -->
+      <div class="bg-gradient-to-br from-zinc-900 to-black p-8 border border-[#a98a66] rounded-sm text-center relative shadow-[0_0_30px_rgba(169,138,102,0.1)]">
+        <div class="absolute top-4 right-4">
+          <span id="tier-badge" class="px-3 py-1 text-xs font-bold uppercase tracking-widest border rounded-full border-zinc-700 text-zinc-500">
+            Tier 1 Status
+          </span>
+        </div>
+
+        <h3 class="text-sm text-gray-400 uppercase tracking-widest mb-2">Total Monthly Earnings</h3>
+        <div id="total-earnings" class="text-5xl md:text-7xl font-serif text-[#a98a66] mb-6">
+          $0.00
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 border-t border-zinc-800 pt-6 mt-6">
+          <div>
+            <div class="text-xs text-gray-500 uppercase tracking-widest mb-1">Total Front-End</div>
+            <div id="total-upfront" class="text-xl md:text-2xl text-white">$0.00</div>
+          </div>
+          <div>
+            <div class="text-xs text-gray-500 uppercase tracking-widest mb-1">Total Residual</div>
+            <div id="total-residual" class="text-xl md:text-2xl text-white">$0.00</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detailed Breakdown -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Hunter's Fee -->
+        <div class="bg-zinc-950 p-6 border border-zinc-800 rounded-sm">
+          <h3 class="text-[#a98a66] font-serif uppercase tracking-wide mb-4 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"></path></svg> 
+            The Hunter's Fee
+          </h3>
+          <div class="space-y-3 text-sm">
+            <div id="t1-row" class="flex justify-between items-center text-zinc-600">
+              <span>Tier 1 (20%) <span id="t1-deals" class="text-xs bg-zinc-800 px-1 ml-1 rounded text-white">0 deals</span></span>
+              <span id="t1-payout">$0.00</span>
+            </div>
+            <div id="t2-row" class="flex justify-between items-center text-zinc-600">
+              <span>Tier 2 (25%) <span id="t2-deals" class="text-xs bg-zinc-800 px-1 ml-1 rounded text-white">0 deals</span></span>
+              <span id="t2-payout">$0.00</span>
+            </div>
+            <div id="t3-row" class="flex justify-between items-center text-zinc-600">
+              <span>Tier 3 (25%) <span id="t3-deals" class="text-xs bg-zinc-800 px-1 ml-1 rounded text-white">0 deals</span></span>
+              <span id="t3-payout">$0.00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Guardian's Trail -->
+        <div class="bg-zinc-950 p-6 border border-zinc-800 rounded-sm">
+          <h3 class="text-[#a98a66] font-serif uppercase tracking-wide mb-4 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+            The Guardian's Trail
+          </h3>
+          <div class="space-y-3 text-sm">
+            <div class="flex justify-between items-center text-white pb-2 border-b border-zinc-900">
+              <span>Existing Book (<span id="existing-book-val">0</span>) @ 5%</span>
+              <span id="existing-payout">$0.00</span>
+            </div>
+            <div id="new-base-row" class="flex justify-between items-center text-zinc-600">
+              <span>New Base (5%) <span id="new-base-deals" class="text-xs bg-zinc-800 px-1 ml-1 rounded text-white">0 deals</span></span>
+              <span id="new-base-payout">$0.00</span>
+            </div>
+            <div id="new-accel-row" class="flex justify-between items-center text-zinc-600">
+              <span>New Accelerator (10%) <span id="new-accel-deals" class="text-xs bg-zinc-800 px-1 ml-1 rounded text-white">0 deals</span></span>
+              <span id="new-accel-payout">$0.00</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- The Board's Review Quotes -->
+      <div class="bg-zinc-900/50 p-6 border-l-2 border-[#a98a66] mt-8 text-sm italic text-gray-400">
+        <p class="mb-3">
+          <span class="text-[#a98a66] font-serif not-italic uppercase tracking-wide">Robert Greene (The Strategist):</span><br/>
+          "Law 40: Despise the Free Lunch. By making this commission-only, you are forcing your reps to stay hungry. But the 'Accelerator' is the bait. You are using their own ambition to scale your empire."
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Utility for currency formatting
+    const formatCurrency = (value) => {
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+    };
+
+    // Main logic and DOM update function
+    function updateDOM() {
+      // 1. Get current values from inputs
+      const deals = parseInt(document.getElementById('deals').value);
+      const dealValue = parseInt(document.getElementById('dealValue').value);
+      const existingClients = parseInt(document.getElementById('existingClients').value);
+      
+      const inCrm = document.getElementById('inCrm').checked;
+      const noDiscount = document.getElementById('noDiscount').checked;
+      const discounted = !noDiscount;
+
+      // 2. Update Input display values
+      document.getElementById('deals-val').innerText = deals;
+      document.getElementById('dealValue-val').innerText = formatCurrency(dealValue);
+      document.getElementById('existingClients-val').innerText = existingClients;
+
+      // 3. Perform Calculations (Identical to React logic)
+      let t1Deals = 0, t2Deals = 0, t3Deals = 0;
+      let upfront = 0, newResidual = 0;
+
+      for (let i = 1; i <= deals; i++) {
+        if (i <= 4) {
+          t1Deals++;
+          upfront += dealValue * 0.20;
+          newResidual += dealValue * 0.05;
+        } else if (i <= 8) {
+          t2Deals++;
+          upfront += dealValue * 0.25;
+          newResidual += dealValue * 0.05;
+        } else {
+          t3Deals++;
+          upfront += dealValue * 0.25;
+          newResidual += dealValue * 0.10;
+        }
+      }
+
+      // Apply Penalties
+      let penaltyMultiplier = 1;
+      if (discounted) penaltyMultiplier = 0.5;
+      if (!inCrm) penaltyMultiplier = 0;
+
+      const actualUpfront = upfront * penaltyMultiplier;
+      const actualNewResidual = newResidual * penaltyMultiplier;
+      const existingResidual = existingClients * (dealValue * 0.05);
+      
+      const totalTakeHome = actualUpfront + actualNewResidual + existingResidual;
+      const potentialLost = upfront - actualUpfront;
+
+      // Determine Tier
+      let currentTier = 1;
+      if (deals >= 5 && deals <= 8) currentTier = 2;
+      if (deals >= 9) currentTier = 3;
+
+      // 4. Update Dashboard UI
+      document.getElementById('total-earnings').innerText = formatCurrency(totalTakeHome);
+      document.getElementById('total-upfront').innerText = formatCurrency(actualUpfront);
+      document.getElementById('total-residual').innerText = formatCurrency(actualNewResidual + existingResidual);
+
+      // Tier Badge Update
+      const tierBadge = document.getElementById('tier-badge');
+      tierBadge.innerText = `Tier ${currentTier} Status`;
+      if (currentTier === 3) {
+        tierBadge.className = "px-3 py-1 text-xs font-bold uppercase tracking-widest border rounded-full border-[#a98a66] text-[#a98a66]";
+      } else if (currentTier === 2) {
+        tierBadge.className = "px-3 py-1 text-xs font-bold uppercase tracking-widest border rounded-full border-zinc-400 text-zinc-400";
+      } else {
+        tierBadge.className = "px-3 py-1 text-xs font-bold uppercase tracking-widest border rounded-full border-zinc-700 text-zinc-500";
+      }
+
+      // Penalty Warning Box Update
+      const penaltyBox = document.getElementById('penalty-box');
+      if (!inCrm || discounted) {
+        penaltyBox.classList.remove('hidden');
+        document.getElementById('potential-lost').innerText = formatCurrency(potentialLost);
+      } else {
+        penaltyBox.classList.add('hidden');
+      }
+
+      // Hunter's Fee Breakdown Update
+      document.getElementById('t1-deals').innerText = `${t1Deals} deals`;
+      document.getElementById('t1-payout').innerText = formatCurrency(t1Deals * dealValue * 0.20);
+      document.getElementById('t1-row').className = `flex justify-between items-center ${t1Deals > 0 ? 'text-white' : 'text-zinc-600'}`;
+
+      document.getElementById('t2-deals').innerText = `${t2Deals} deals`;
+      document.getElementById('t2-payout').innerText = formatCurrency(t2Deals * dealValue * 0.25);
+      document.getElementById('t2-row').className = `flex justify-between items-center ${t2Deals > 0 ? 'text-white' : 'text-zinc-600'}`;
+
+      document.getElementById('t3-deals').innerText = `${t3Deals} deals`;
+      document.getElementById('t3-payout').innerText = formatCurrency(t3Deals * dealValue * 0.25);
+      document.getElementById('t3-row').className = `flex justify-between items-center ${t3Deals > 0 ? 'text-[#a98a66] font-bold' : 'text-zinc-600'}`;
+
+      // Guardian's Trail Breakdown Update
+      document.getElementById('existing-book-val').innerText = existingClients;
+      document.getElementById('existing-payout').innerText = formatCurrency(existingResidual);
+
+      const newBaseDeals = t1Deals + t2Deals;
+      document.getElementById('new-base-deals').innerText = `${newBaseDeals} deals`;
+      document.getElementById('new-base-payout').innerText = formatCurrency(newBaseDeals * dealValue * 0.05);
+      document.getElementById('new-base-row').className = `flex justify-between items-center ${newBaseDeals > 0 ? 'text-gray-300' : 'text-zinc-600'}`;
+
+      document.getElementById('new-accel-deals').innerText = `${t3Deals} deals`;
+      document.getElementById('new-accel-payout').innerText = formatCurrency(t3Deals * dealValue * 0.10);
+      document.getElementById('new-accel-row').className = `flex justify-between items-center ${t3Deals > 0 ? 'text-[#a98a66] font-bold' : 'text-zinc-600'}`;
+    }
+
+    // Run once on load to populate the initial state
+    window.onload = updateDOM;
+  </script>
+</body>
+</html>
